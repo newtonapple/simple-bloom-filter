@@ -10,6 +10,7 @@ require 'Zlib'
 class SimpleBloomFilter
   attr_reader :n, :p, :m, :k, :b, :bit_fields
   
+  
   # n: number of total elements
   # p: false positive probability
   # b: number of bits per bit-field
@@ -17,38 +18,45 @@ class SimpleBloomFilter
   # k: optimal number of hash (estimate)
   def initialize( n, p=0.01, b=8 )
     @n, @p, @b = n, p, b
-    @m = ( - ( @n * Math.log(@p) / (Math.log(2)**2) ) ).ceil
+    @m = ( -(@n * Math.log(@p) / (Math.log(2)**2)) ).ceil
     @k = (0.7 * (@m/@n)).round
     @bit_fields = "\0" * (@m/@b + 1)
   end
   
+  
   def add( string )
-    k.times do |i|
-      index = crc32(string, i) % m
-      set_field(index)
-    end
+    each_hashed_index(string) { |index| set_field(index) }
   end
   
   
   def include?( string )
-    k.times do |i|
-      index = crc32(string, i) % m
-      return false unless get_field(index)
-    end
+    each_hashed_index(string) { |index| return false unless get_field(index) }
     true
   end
   
-  private
   
-    def set_field( position )
-      @bit_fields[position / @b] |= (1 << (position % @b))
+  
+  private
+    
+    def each_hashed_index( string )
+      k.times do |i|
+        index = crc32(string, i) % m
+        yield index
+      end
     end
     
-    def get_field( position )
-      @bit_fields[position / @b] & (1 << (position % @b)) > 0
+    
+    def set_field( bit_position )
+      @bit_fields[bit_position / @b] |= (1 << (bit_position % @b))
     end
     
-    def crc32(string, index=0)
+    
+    def get_field( bit_position )
+      @bit_fields[bit_position / @b] & (1 << (bit_position % @b)) > 0
+    end
+    
+    
+    def crc32( string, index=0 )
       Zlib.crc32(string, index)
     end
 end
