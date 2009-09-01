@@ -40,7 +40,7 @@ class SimpleBloomFilter
     
     def each_hashed_index( string )
       k.times do |i|
-        index = crc32(string, i) % m
+        index = Zlib.crc32(string, i) % m
         yield index
       end
     end
@@ -53,10 +53,5 @@ class SimpleBloomFilter
     
     def get_field( bit_position )
       @bit_fields[bit_position / @b] & (1 << (bit_position % @b)) > 0
-    end
-    
-    
-    def crc32( string, index=0 )
-      Zlib.crc32(string, index)
     end
 end
