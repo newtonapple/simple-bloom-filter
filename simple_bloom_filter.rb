@@ -39,8 +39,8 @@ class SimpleBloomFilter
   private
     
     def each_hashed_index( string )
-      k.times do |i|
-        index = Zlib.crc32(string, i) % m
+      @k.times do |i|
+        index = Zlib.crc32(string, i) % @m
         yield index
       end
     end
