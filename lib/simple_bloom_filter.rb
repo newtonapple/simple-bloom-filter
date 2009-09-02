@@ -5,7 +5,7 @@
 #  http://github.com/igrigorik/bloomfilter/tree/master
 #  http://blog.rapleaf.com/dev/?p=6
 
-require 'Zlib'
+require 'zlib'
 
 class SimpleBloomFilter
   attr_reader :n, :p, :m, :k, :b, :bit_fields
@@ -40,7 +40,7 @@ class SimpleBloomFilter
     
     def each_hashed_index( string )
       @k.times do |i|
-        index = Zlib.crc32(string, i) % @m
+        index = Zlib.crc32("#{string}-#{i}", i) % @m
         yield index
       end
     end
